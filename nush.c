@@ -8,8 +8,18 @@
 #include "cvector.h"
 #include "tokens.h"
 
-void
-execute(char* cmd)
+
+// does cv contain 'exit' token?
+int exitcmd(cvector* cv) {
+  for (int i = 0; i < cv->size; i++) {
+    if (strcmp("exit", cv->items[i]) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+void execute(cvector* cv)
 {
   int cpid;
 
@@ -52,53 +62,52 @@ execute(char* cmd)
 
     printf("== executed program's output: ==\n");
 
-    cvector* cv = new_cvector();
-    tokenize(cv, cmd, strlen(cmd));
-    cmd = cv->items[0];
+    char* cmd = cv->items[0];
 
     // create arguments array and init with command
-    char* args[cv->size  + 2];
-    args[0] = cmd;
+    char* args[cv->size  + 1];
 
     for (int i = 1; i < cv->size; i++) {
-      args[i + 1] = cv->items[i];
+      args[i] = cv->items[i];
     }
-    args[cv->size + 1] = 0; // null terminate
+    args[cv->size] = 0; // null terminate
 
     execvp(cmd, args);
-
-    // free cvector
-    free_cvector(cv);
   }
 }
 
-int
-main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
 
   while (1) {
     char cmd[256];
+    cvector* cv = new_cvector();
 
     if (argc == 1) {
       printf("nush$ ");
       fflush(stdout);
       char* x = fgets(cmd, 256, stdin);
       if (!x) {
-        return 0;
+        break;
+      }
+      // tokenize input
+      tokenize(cv, cmd, strlen(cmd));
+      if (exitcmd(cv)) {
+        break;
       }
     }
     else {
-      memcpy(cmd, "echo", 5);
+      // read file
+      int file = open(argv[1], O_CREAT | O_TRUNC | O_WRONLY);
     }
 
-    execute(cmd);
 
+    execute(cv);
+    free_cvector(cv);
 
   }
   return 0;
 }
 
 
-//TODO: programs to execute, pass args
-//TODO: commands such as pwd, echo -> run as programs w/ execute
 //TODO: cd, exit
