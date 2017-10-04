@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "cvector.h"
+#include "tokens.h"
+
 void
 execute(char* cmd)
 {
@@ -20,7 +23,7 @@ execute(char* cmd)
     int status;
     waitpid(cpid, &status, 0);
 
-    printf("== executed program complete ==\n");
+    printf("== execu  ted program complete ==\n");
 
     printf("child returned with wait code %d\n", status);
     if (WIFEXITED(status)) {
@@ -45,6 +48,8 @@ execute(char* cmd)
 
     printf("== executed program's output: ==\n");
 
+    //TODO tokenize cmd, create array char* args of arguments
+
     execvp(cmd, args);
     printf("Can't get here, exec only returns on error.");
   }
@@ -68,3 +73,8 @@ main(int argc, char* argv[])
 
   return 0;
 }
+
+
+//TODO: programs to execute, pass args
+//TODO: commands such as pwd, echo -> run as programs w/ execute
+//TODO: cd, exit
