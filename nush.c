@@ -16,13 +16,13 @@
 void execute(cvector* cv);
 void userLoop();
 void scriptLoop(char* argv[]);
+int backgroundProcess(cvector* cv);
 
-/*
 // is this a backgroundProcess?
 int backgroundProcess(cvector* cv) {
   return strcmp(cv->items[cv->size - 1], "&") == 0;
 }
-*/
+
 // execute a command
 void execute(cvector* cv) {
   int cpid;
@@ -31,12 +31,7 @@ void execute(cvector* cv) {
     // Child may still be running until we wait.
     int status;
 
-/*
-    // check if we want to wait
-    if (backgroundProcess(cv)) {
-      waitpid(cpid, &status, 0);
-    }
-    */
+    waitpid(cpid, &status, 0);
   }
   else { //child
     // check for cd
@@ -129,3 +124,6 @@ int main(int argc, char* argv[])
 
   return 0;
 }
+
+//TODO handle backgroundProcess
+//TODO redirect operator -> use scriptLoop to read and process? probably wont work
