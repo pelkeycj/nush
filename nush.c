@@ -36,12 +36,27 @@ int backgroundProcess(cvector* cv) {
 // execute a command
 void execute(cvector* cv) {
   int cpid;
+  int bg = 0;
+
+  // check if it should run in background
+  if (backgroundProcess(cv)) {
+    cvector_pop(cv);
+    bg = 1;
+  }
+
 
   if ((cpid = fork())) { // parent
     // Child may still be running until we wait.
     int status;
 
-    waitpid(cpid, &status, 0);
+    if (!bg) {
+      waitpid(cpid, &status, 0);
+    }
+    else {
+      return;
+    }
+
+    //waitpid(cpid, &status, 0);
   }
   else { //child
     // check for cd
@@ -50,8 +65,6 @@ void execute(cvector* cv) {
       chdir(cv->items[1]);
       return;
     }
-
-    // check if cd
 
     // create arguments array and populate
     char* args[cv->size  + 1];

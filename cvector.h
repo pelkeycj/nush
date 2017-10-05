@@ -24,6 +24,6 @@ void cvector_put(cvector* cv, int i, char* item);
 void cvector_push(cvector* cv, char* item);
 
 // remove last item
-char* cvector_pop(cvector* cv, char* item);
+void cvector_pop(cvector* cv);
 
 #endif
