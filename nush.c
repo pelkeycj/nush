@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 
 #include "cvector.h"
@@ -19,17 +20,17 @@ void userLoop();
 void scriptLoop(char* argv[]);
 int backgroundProcess(cvector* cv);
 
+// pipeline to handle operators
 void parseSemicolon(cvector* cv);
 void parseBool(cvector* cv);
 void parseRedirIn(cvector* cv);
-void parseRedirOut(cvector* cv)
+void parseRedirOut(cvector* cv);
 
 
 // is this a backgroundProcess?
 int backgroundProcess(cvector* cv) {
   return strcmp(cv->items[cv->size - 1], "&") == 0;
 }
-
 
 // execute a command
 void execute(cvector* cv) {
@@ -53,8 +54,6 @@ void execute(cvector* cv) {
     else {
       return;
     }
-
-    //waitpid(cpid, &status, 0);
   }
   else { //child
     // check for cd
@@ -78,40 +77,65 @@ void execute(cvector* cv) {
 
 // handle redirect output operator
 void parseRedirOut(cvector* cv) {
+  int stdout_dup = dup(1);
 
+  if (contains(cv, ">")) {
+    char* file;
+    cvector* sub = new_cvector();
+
+    // find >, create sub cvector up to index
+    for (int i = 0; i < cv->size; i++) {
+      if (strcmp(cv->items[i], ">") == 0) {
+        file = cv->items[i + 1];
+        break;
+      }
+      cvector_push(sub, cv->items[i]);
+    }
+
+    // close std input
+    close(1);
+    // open output
+    open(file, O_RDWR | O_CREAT, S_IRWXO);
+    // change file permissions bc C does not listen to me
+    chmod(file, S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH);
+
+    parseRedirIn(sub);
+    free_cvector(sub);
+    dup2(stdout_dup, 1);
+  }
+  else {
+    parseRedirIn(cv);
+  }
 }
 
 // handle redirect input operator
 void parseRedirIn(cvector* cv) {
   int stdin_dup = dup(0);
-  int stdout_dup = dup(1);
 
   // < operator: find and open file, execute command arg
   if (contains(cv, "<")) {
-    char* command;
     char* file;
-    // find <
+    cvector* sub = new_cvector();
+    // find <, read command up until found into sub cvector
     for (int i = 0; i < cv->size; i++) {
       if(strcmp(cv->items[i], "<") == 0) {
-        command = cv->items[i - 1];
         file = cv->items[i + 1];
         break;
       }
+      cvector_push(sub, cv->items[i]);
     }
 
     // open file in place of stdin
     close(0);
     open(file, O_RDONLY);
 
-    cvector* sub = new_cvector();
-    cvector_push(sub, command);
     //execute cmd
-    parseRedirOut(sub);
+    execute(sub);
     free_cvector(sub);
     dup2(stdin_dup, 0); // reopen stdin
   }
   else {
-    parseRedirOut(cv);
+    execute(cv);
   }
 }
 
@@ -128,7 +152,7 @@ void parseBool(cvector* cv) {
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
       if (strcmp(cv->items[i], "&&") == 0) {
-        parseRedir(sub);
+        parseRedirOut(sub);
         reset(sub);
       }
       else {
@@ -145,7 +169,7 @@ void parseBool(cvector* cv) {
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
       if (strcmp(cv->items[i], "||") == 0) {
-        parseRedir(sub);
+        parseRedirOut(sub);
         reset(sub);
       }
       else {
@@ -154,10 +178,10 @@ void parseBool(cvector* cv) {
     }
   }
   else if (!contains(cv, "&&") && !contains(cv, "||")) {
-    parseRedir(cv);
+    parseRedirOut(cv);
   }
   if (sub->size > 0) {
-    parseRedir(sub);
+    parseRedirOut(sub);
   }
   free_cvector(sub);
 }
