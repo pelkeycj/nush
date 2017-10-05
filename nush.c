@@ -12,15 +12,6 @@
 
 #define LINE_BUFFER 256
 
-// does cv contain 'exit' token?
-int exitcmd(cvector* cv) {
-  for (int i = 0; i < cv->size; i++) {
-    if (strcmp("exit", cv->items[i]) == 0) {
-      return 1;
-    }
-  }
-  return 0;
-}
 
 // execute a command
 void execute(cvector* cv) {
@@ -34,13 +25,12 @@ void execute(cvector* cv) {
   else {
     //printf("== executed program's output: ==\n");
 
+    // check for cd
     char* cmd = cv->items[0];
     if (strcmp(cmd, "cd") == 0 && cv->size >= 2) {
       chdir(cv->items[1]);
       return;
     }
-
-    // check if cd
 
     // create arguments array and populate
     char* args[cv->size  + 1];
@@ -71,7 +61,7 @@ void userLoop() {
 
     // tokenize input
     tokenize(cv, cmd, strlen(cmd));
-    if (exitcmd(cv)) {
+    if (cv->size > 0 && strcmp("exit", cv->items[0]) == 0) {
       free_cvector(cv);
       return;
     }
@@ -103,7 +93,7 @@ void scriptLoop(char* argv[]) {
 
     // tokenize input
     tokenize(cv, cmd, strlen(cmd));
-    if (exitcmd(cv)) {
+    if (cv->size > 0 && strcmp("exit", cv->items[0]) == 0) {
       free_cvector(cv);
       return;
     }
