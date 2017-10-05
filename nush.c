@@ -13,11 +13,12 @@
 #define LINE_BUFFER 256
 
 
+
 void execute(cvector* cv);
 void userLoop();
 void scriptLoop(char* argv[]);
 int backgroundProcess(cvector* cv);
-
+void parseSemicolon(cvector* cv);
 
 
 
@@ -110,7 +111,8 @@ void userLoop() {
 
     // tokenize input
     tokenize(cv, cmd, strlen(cmd));
-    if (exitcmd(cv)) {
+    // exit?
+    if (strcmp(cv->items[0], "exit") == 0) {
       free_cvector(cv);
       return;
     }
@@ -142,7 +144,8 @@ void scriptLoop(char* argv[]) {
 
     // tokenize input
     tokenize(cv, cmd, strlen(cmd));
-    if (exitcmd(cv)) {
+    // exit?
+    if (strcmp(cv->items[0], "exit") == 0) {
       free_cvector(cv);
       return;
     }
