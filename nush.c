@@ -10,6 +10,8 @@
 #include "tokens.h"
 
 
+#define LINE_BUFFER 256
+
 // does cv contain 'exit' token?
 int exitcmd(cvector* cv) {
   for (int i = 0; i < cv->size; i++) {
@@ -21,8 +23,7 @@ int exitcmd(cvector* cv) {
 }
 
 // execute a command
-void execute(cvector* cv)
-{
+void execute(cvector* cv) {
   int cpid;
 
   if ((cpid = fork())) {
@@ -31,14 +32,20 @@ void execute(cvector* cv)
     waitpid(cpid, &status, 0);
   }
   else {
-    printf("== executed program's output: ==\n");
+    //printf("== executed program's output: ==\n");
 
     char* cmd = cv->items[0];
+    if (strcmp(cmd, "cd") == 0 && cv->size >= 2) {
+      chdir(cv->items[1]);
+      continue;
+    }
 
-    // create arguments array and init with command
+    // check if cd
+
+    // create arguments array and populate
     char* args[cv->size  + 1];
 
-    for (int i = 1; i < cv->size; i++) {
+    for (int i = 0; i < cv->size; i++) {
       args[i] = cv->items[i];
     }
     args[cv->size] = 0; // null terminate
@@ -50,13 +57,13 @@ void execute(cvector* cv)
 // loop function to read and process user input
 void userLoop() {
   while (1) {
-    char cmd[256];
+    char cmd[LINE_BUFFER];
     cvector* cv = new_cvector();
 
     // get input
     printf("nush$ ");
     fflush(stdout);
-    char* x = fgets(cmd, 256, stdin);
+    char* x = fgets(cmd, LINE_BUFFER, stdin);
     if (!x) {
       free_cvector(cv);
       return;
@@ -79,21 +86,21 @@ void userLoop() {
 // loop function to read and process script input
 void scriptLoop(char* argv[]) {
   // open file
-  int file = open(argv[1], O_WRONLY);
-
-//TODO loop on input?
+  FILE* file = fopen(argv[1], "r");
+  if (!file) {
+    printf("Could not open file: %s\n", argv[1]);
+  }
 
   while (1) {
-    char cmd[256];
+    char cmd[LINE_BUFFER];
     cvector* cv = new_cvector();
 
-    //TODO read file
-    /*
+    char* x = fgets(cmd, LINE_BUFFER, file);
     if (!x) {
       free_cvector(cv);
       return;
     }
-    */
+
     // tokenize input
     tokenize(cv, cmd, strlen(cmd));
     if (exitcmd(cv)) {
