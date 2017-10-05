@@ -97,6 +97,10 @@ void parseBool(cvector* cv) {
   }
   //TODO
   else if (contains(cv, "||")) {
+    if (strcmp(cv->items[0], "true") == 0) {
+      free_cvector(sub);
+      return;
+    }
     //execute first that is not false or true
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
