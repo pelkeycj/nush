@@ -13,18 +13,32 @@
 #define LINE_BUFFER 256
 
 
+void execute(cvector* cv);
+void userLoop();
+void scriptLoop(char* argv[]);
+
+/*
+// is this a backgroundProcess?
+int backgroundProcess(cvector* cv) {
+  return strcmp(cv->items[cv->size - 1], "&") == 0;
+}
+*/
 // execute a command
 void execute(cvector* cv) {
   int cpid;
 
-  if ((cpid = fork())) {
+  if ((cpid = fork())) { // parent
     // Child may still be running until we wait.
     int status;
-    waitpid(cpid, &status, 0);
-  }
-  else {
-    //printf("== executed program's output: ==\n");
 
+/*
+    // check if we want to wait
+    if (backgroundProcess(cv)) {
+      waitpid(cpid, &status, 0);
+    }
+    */
+  }
+  else { //child
     // check for cd
     char* cmd = cv->items[0];
     if (strcmp(cmd, "cd") == 0 && cv->size >= 2) {
