@@ -73,7 +73,51 @@ void execute(cvector* cv) {
   }
 }
 
-//
+
+// handle boolean ops
+// if contains && or || -> split
+// && -> check if one is false, if so do not execute any,
+// else execute all
+// || -> check if one is true, if so execute all, else execute none
+void parseBool(cvector* cv) {
+  cvector* sub = new_cvector();
+
+  // does it contain && bool?
+  if (contains(cv, "&&") && !contains(cv, "false")) {
+    for (int i = 0; i < cv->size; i++) {
+      // if we hit "&&" execute first command, continue to read second
+      if (strcmp(cv->items[i], "&&") == 0) {
+        execute(sub);
+        reset(sub);
+      }
+      else {
+        cvector_push(sub, cv->items[i]);
+      }
+    }
+  }
+  //TODO
+  else if (contains(cv, "||")) {
+    //execute first that is not false or true
+    for (int i = 0; i < cv->size; i++) {
+      // if we hit "&&" execute first command, continue to read second
+      if (strcmp(cv->items[i], "||") == 0) {
+        execute(sub);
+        reset(sub);
+      }
+      else {
+        cvector_push(sub, cv->items[i]);
+      }
+    }
+  }
+  else if (!contains(cv, "&&") && !contains(cv, "||")) {
+    execute(cv);
+  }
+  if (sub->size > 0) {
+    execute(sub);
+  }
+  free_cvector(sub);
+}
+
 
 // read and copy a cvector until a semicolon is reached, execute on semicolon
 // repeat
@@ -82,7 +126,7 @@ void parseSemicolon(cvector* cv) {
   for (int i = 0; i < cv->size; i++) {
     if (strcmp(cv->items[i], ";") == 0) {
       // execute and reset
-      execute(sub);
+      parseBool(sub);
       reset(sub);
     }
     else {
@@ -90,7 +134,7 @@ void parseSemicolon(cvector* cv) {
     }
   }
   if (sub->size > 0) {
-    execute(sub);
+    parseBool(sub);
   }
   free_cvector(sub);
 }

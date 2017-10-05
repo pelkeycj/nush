@@ -29,4 +29,8 @@ void cvector_pop(cvector* cv);
 // reset a cvector. free all contents and reinitialize
 void reset(cvector* cv);
 
+// does cv contain item?
+// 1 if true
+int contains(cvector* cv, char* item);
+
 #endif

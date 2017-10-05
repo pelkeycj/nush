@@ -78,3 +78,13 @@ void reset(cvector* cv) {
   cv->items = malloc(cv->capacity * sizeof(char*));
   memset(cv->items, 0, cv->capacity * sizeof(char*)); //set all chars to 0
 }
+
+// return 1 if cv contains item
+int contains(cvector* cv, char* item) {
+  for (int i = 0; i < cv->size; i++) {
+    if (strcmp(cv->items[i], item) == 0) {
+      return 1;
+    }
+  }
+  return 0;
+}
