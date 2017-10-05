@@ -73,6 +73,8 @@ void execute(cvector* cv) {
   }
 }
 
+//
+
 // read and copy a cvector until a semicolon is reached, execute on semicolon
 // repeat
 void parseSemicolon(cvector* cv) {
@@ -125,7 +127,7 @@ void userLoop() {
 }
 
 // loop function to read and process script input
-void scriptLoop(char* argv[]) {
+void scriptLoop(char* argv[], int givenProgram, char* program) {
   // open file
   FILE* file = fopen(argv[1], "r");
   if (!file) {
@@ -162,7 +164,7 @@ int main(int argc, char* argv[])
       userLoop();
     }
   else {
-    scriptLoop(argv);
+    scriptLoop(argv, 0, null);
   }
 
   return 0;
