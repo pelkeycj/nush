@@ -26,4 +26,7 @@ void cvector_push(cvector* cv, char* item);
 // remove last item
 void cvector_pop(cvector* cv);
 
+// reset a cvector. free all contents and reinitialize
+void reset(cvector* cv);
+
 #endif

@@ -72,6 +72,27 @@ void execute(cvector* cv) {
   }
 }
 
+// read and copy a cvector until a semicolon is reached, execute on semicolon
+// repeat
+void parseSemicolon(cvector* cv) {
+  cvector* sub = new_cvector();
+  for (int i = 0; i < cv->size; i++) {
+    if (strcmp(cv->items[i], ";") == 0) {
+      // execute and reset
+      execute(sub);
+      reset(sub);
+    }
+    else {
+      cvector_push(sub, cv->items[i]);
+    }
+  }
+  if (sub->size > 0) {
+    execute(sub);
+  }
+  free_cvector(sub);
+}
+
+
 // loop function to read and process user input
 void userLoop() {
   while (1) {
@@ -94,8 +115,8 @@ void userLoop() {
       return;
     }
 
-    // execute
-    execute(cv);
+    // parse semicolons and execute
+    parseSemicolon(cv);
     free_cvector(cv);
   }
 
@@ -126,8 +147,8 @@ void scriptLoop(char* argv[]) {
       return;
     }
 
-    // execute
-    execute(cv);
+    // parse semicolons and execute
+    parseSemicolon(cv);
     free_cvector(cv);
   }
 }

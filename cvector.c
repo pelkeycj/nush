@@ -63,3 +63,18 @@ void cvector_pop(cvector* cv) {
     free(cv->items[cv->size--]);
   }
 }
+
+// reset a cvector to be empty
+void reset(cvector* cv) {
+  for (int i = 0; i < cv->size; i++) {
+    if (cv->items[i] != 0) {
+      free(cv->items[i]);
+    }
+  }
+  free(cv->items);
+
+  cv->size = 0;
+  cv->capacity = 20;
+  cv->items = malloc(cv->capacity * sizeof(char*));
+  memset(cv->items, 0, cv->capacity * sizeof(char*)); //set all chars to 0
+}
