@@ -19,6 +19,7 @@ void userLoop();
 void scriptLoop(char* argv[]);
 int backgroundProcess(cvector* cv);
 void parseSemicolon(cvector* cv);
+void parseBool(cvector* cv);
 
 
 
