@@ -127,7 +127,7 @@ void userLoop() {
 }
 
 // loop function to read and process script input
-void scriptLoop(char* argv[], int givenProgram, char* program) {
+void scriptLoop(char* argv[]) {
   // open file
   FILE* file = fopen(argv[1], "r");
   if (!file) {
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
       userLoop();
     }
   else {
-    scriptLoop(argv, 0, null);
+    scriptLoop(argv);
   }
 
   return 0;
