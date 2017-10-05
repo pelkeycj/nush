@@ -169,5 +169,4 @@ int main(int argc, char* argv[])
 }
 
 
-//TODO semicolon -> split cvector into multiple cvectors and execute
 //TODO redirect operator -> use scriptLoop to read and process? probably wont work
