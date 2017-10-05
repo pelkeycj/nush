@@ -3,7 +3,7 @@
 #include <string.h>
 #include "cvector.h"
 
-// based on svec code from lecture
+// cvector.x: This code is based on Nat's lecture notes: 07-io-and-shell/svec.c
 
 // Allocate a new cvector
 cvector* new_cvector() {

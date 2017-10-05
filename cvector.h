@@ -1,6 +1,9 @@
 #ifndef CVECTOR_H
 #define CVECTOR_H
 
+// cvector.h: This code is based on Nat's lecture notes: 07-io-and-shell/svec.h
+
+
 typedef struct cvector {
   int size;
   int capacity;
