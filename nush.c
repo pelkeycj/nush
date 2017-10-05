@@ -12,20 +12,14 @@
 
 #define LINE_BUFFER 256
 
-// does cv contain 'exit' token?
-int exitcmd(cvector* cv) {
-  for (int i = 0; i < cv->size; i++) {
-    if (strcmp("exit", cv->items[i]) == 0) {
-      return 1;
-    }
-  }
-  return 0;
-}
 
 void execute(cvector* cv);
 void userLoop();
 void scriptLoop(char* argv[]);
 int backgroundProcess(cvector* cv);
+
+
+
 
 // is this a backgroundProcess?
 int backgroundProcess(cvector* cv) {
@@ -150,5 +144,6 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-//TODO handle backgroundProcess
+
+//TODO semicolon -> split cvector into multiple cvectors and execute
 //TODO redirect operator -> use scriptLoop to read and process? probably wont work
