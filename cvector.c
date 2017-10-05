@@ -56,3 +56,10 @@ void cvector_push(cvector* cv, char* item) {
   //increment size and insert
   cvector_put(cv, cv->size, item);
 }
+
+// remove last item
+char* cvector_pop(cvector* cv) {
+  if (cv->size > 0) {
+    free(cv->items[cv->size]--);
+  }
+}
