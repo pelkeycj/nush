@@ -95,7 +95,6 @@ void parseBool(cvector* cv) {
       }
     }
   }
-  //TODO
   else if (contains(cv, "||")) {
     if (strcmp(cv->items[0], "true") == 0) {
       free_cvector(sub);
@@ -219,4 +218,6 @@ int main(int argc, char* argv[])
 }
 
 
-//TODO redirect operator -> use scriptLoop to read and process? probably wont work
+//TODO redirect operator <
+//TODO redirect operator >
+//TODO pipe | -> redirect output to tmp file, read file, rm file?
