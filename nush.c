@@ -37,7 +37,7 @@ void execute(cvector* cv) {
     char* cmd = cv->items[0];
     if (strcmp(cmd, "cd") == 0 && cv->size >= 2) {
       chdir(cv->items[1]);
-      continue;
+      return;
     }
 
     // check if cd
