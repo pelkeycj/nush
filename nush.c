@@ -18,9 +18,11 @@ void execute(cvector* cv);
 void userLoop();
 void scriptLoop(char* argv[]);
 int backgroundProcess(cvector* cv);
+
 void parseSemicolon(cvector* cv);
 void parseBool(cvector* cv);
-
+void parseRedirIn(cvector* cv);
+void parseRedirOut(cvector* cv)
 
 
 // is this a backgroundProcess?
@@ -74,6 +76,44 @@ void execute(cvector* cv) {
   }
 }
 
+// handle redirect output operator
+void parseRedirOut(cvector* cv) {
+
+}
+
+// handle redirect input operator
+void parseRedirIn(cvector* cv) {
+  int stdin_dup = dup(0);
+  int stdout_dup = dup(1);
+
+  // < operator: find and open file, execute command arg
+  if (contains(cv, "<")) {
+    char* command;
+    char* file;
+    // find <
+    for (int i = 0; i < cv->size; i++) {
+      if(strcmp(cv->items[i], "<") == 0) {
+        command = cv->items[i - 1];
+        file = cv->items[i + 1];
+        break;
+      }
+    }
+
+    // open file in place of stdin
+    close(0);
+    open(file, O_RDONLY);
+
+    cvector* sub = new_cvector();
+    cvector_push(sub, command);
+    //execute cmd
+    parseRedirOut(sub);
+    free_cvector(sub);
+    dup2(stdin_dup, 0); // reopen stdin
+  }
+  else {
+    parseRedirOut(cv);
+  }
+}
 
 // handle boolean ops
 // if contains && or || -> split
@@ -88,7 +128,7 @@ void parseBool(cvector* cv) {
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
       if (strcmp(cv->items[i], "&&") == 0) {
-        execute(sub);
+        parseRedir(sub);
         reset(sub);
       }
       else {
@@ -105,7 +145,7 @@ void parseBool(cvector* cv) {
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
       if (strcmp(cv->items[i], "||") == 0) {
-        execute(sub);
+        parseRedir(sub);
         reset(sub);
       }
       else {
@@ -114,10 +154,10 @@ void parseBool(cvector* cv) {
     }
   }
   else if (!contains(cv, "&&") && !contains(cv, "||")) {
-    execute(cv);
+    parseRedir(cv);
   }
   if (sub->size > 0) {
-    execute(sub);
+    parseRedir(sub);
   }
   free_cvector(sub);
 }
@@ -219,6 +259,7 @@ int main(int argc, char* argv[])
 }
 
 
-//TODO redirect operator <
+//TODO redirect operator < : locate redir operator, open file right after it
+        //                   assign file to to input descriptor, dup2 call?
 //TODO redirect operator >
 //TODO pipe | -> redirect output to tmp file, read file, rm file?
