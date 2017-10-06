@@ -20,11 +20,13 @@ void userLoop();
 void scriptLoop(char* argv[]);
 int backgroundProcess(cvector* cv);
 
-// pipeline to handle operators
+// cvector of command line input is piped through
+// to process the operators
 void parseSemicolon(cvector* cv);
 void parseBool(cvector* cv);
-void parseRedirIn(cvector* cv);
 void parseRedirOut(cvector* cv);
+void parseRedirIn(cvector* cv);
+
 
 
 // is this a backgroundProcess?
@@ -74,6 +76,9 @@ void execute(cvector* cv) {
     execvp(cmd, args);
   }
 }
+
+
+//TODO pipe -> before redir?
 
 // handle redirect output operator
 void parseRedirOut(cvector* cv) {
@@ -281,9 +286,3 @@ int main(int argc, char* argv[])
 
   return 0;
 }
-
-
-//TODO redirect operator < : locate redir operator, open file right after it
-        //                   assign file to to input descriptor, dup2 call?
-//TODO redirect operator >
-//TODO pipe | -> redirect output to tmp file, read file, rm file?
