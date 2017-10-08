@@ -77,8 +77,52 @@ void execute(cvector* cv) {
   }
 }
 
+//TODO handle pipes -> see lecture + notes
+void parsePipe(cvector* cv) {
+  if (contains(cv, "|")) {
+    cvector* left = new_cvector();
+    cvector* right = new_cvector();
+    int pipeIdx;
 
-//TODO pipe -> before redir?
+    // get left command
+    for (int i = 0; i < cv->size; i++) {
+      if (strcmp(cv->items[i], "|") ==0) {
+        pipeIdx = i;
+        break;
+      }
+      cvector_push(left, cv->items[i]);
+    }
+    // get right command
+    for (int i = pipeIdx + 1; i < cv->size; i++) {
+      cvector_push(right, cv->items[i]);
+    }
+
+
+    // create file descriptors
+    int pipes[2]; /// pipes[0] is for reading, pipes[1] for writing
+    pipe(pipes);
+    int cpid;
+    int stdin_dup = dup(0);
+    int stdout_dup = dup(1);
+
+    if ((cpid = fork())) { // parent handles right side
+
+      /*
+      waitpid(cpid, &status, 0);
+      dup(pipes[0]);
+      parsePipe(right);
+      // restore
+      dup2(stdin_dup, 0);
+      dup2(stdout_dup, 1);
+      */
+    }
+    else { // child handle left
+    }
+  }
+  else {
+    parseRedirOut(cv);
+  }
+}
 
 // handle redirect output operator
 void parseRedirOut(cvector* cv) {
@@ -157,7 +201,7 @@ void parseBool(cvector* cv) {
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
       if (strcmp(cv->items[i], "&&") == 0) {
-        parseRedirOut(sub);
+        parsePipe(sub);
         reset(sub);
       }
       else {
@@ -174,7 +218,7 @@ void parseBool(cvector* cv) {
     for (int i = 0; i < cv->size; i++) {
       // if we hit "&&" execute first command, continue to read second
       if (strcmp(cv->items[i], "||") == 0) {
-        parseRedirOut(sub);
+        parsePipe(sub);
         reset(sub);
       }
       else {
@@ -183,10 +227,10 @@ void parseBool(cvector* cv) {
     }
   }
   else if (!contains(cv, "&&") && !contains(cv, "||")) {
-    parseRedirOut(cv);
+    parsePipe(cv);
   }
   if (sub->size > 0) {
-    parseRedirOut(sub);
+    parsePipe(sub);
   }
   free_cvector(sub);
 }
