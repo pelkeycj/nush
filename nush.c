@@ -40,6 +40,10 @@ void execute(cvector* cv) {
   int cpid;
   int bg = 0;
 
+  if (cv->size == 0 || contains(cv, "exit")) {
+    return;
+  }
+
   // check if it should run in background
   if (backgroundProcess(cv)) {
     cvector_pop(cv);
@@ -112,7 +116,6 @@ void parsePipe(cvector* cv) {
     int stdout_dup = dup(1);
 
     if ((cpid = fork())) {
-      // In the parent. execute on right side of pipe
       close(p_write);
       close(0);
       dup(p_read);
@@ -121,25 +124,22 @@ void parsePipe(cvector* cv) {
       int status;
       waitpid(cpid, &status, 0);
 
-      int rv = read(0, temp, 100);
-      dup2(stdin_dup, 0);
       dup2(stdout_dup, 1);
-      temp[rv] = 0;
 
-      write(1, temp, strlen(temp));
-      //rv = write(1, temp, strlen(temp));
+      parsePipe(right);
+      dup2(stdin_dup, 0);
+
+      free_cvector(right);
     }
     else {
       // In the child. execute on left side of pipe
       close(p_read);
       close(1); // close stdout
       dup(p_write);
-      char msg[] = "Hello, pipe.\n";
-      char* args[] = {"echo", "pipetest", 0};
-      execvp("echo", args);
-      //write(p_write, msg, strlen(msg));
-      assert(0);
 
+      parseRedirOut(left);
+      free_cvector(left);
+      exit(1);
     }
   }
   else {
