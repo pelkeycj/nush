@@ -114,12 +114,15 @@ void parsePipe(cvector* cv) {
     if ((cpid = fork())) {
       // In the parent. execute on right side of pipe
       close(p_write);
+      close(0);
+      dup(p_read);
 
       char temp[100];
       int status;
       waitpid(cpid, &status, 0);
 
-      int rv = read(p_read, temp, 100);
+      int rv = read(0, temp, 100);
+      dup2(stdin_dup, 0);
       dup2(stdout_dup, 1);
       temp[rv] = 0;
 
