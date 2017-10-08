@@ -6,6 +6,7 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <assert.h>
 
 #include "cvector.h"
 #include "tokens.h"
@@ -77,6 +78,7 @@ void execute(cvector* cv) {
   }
 }
 
+
 //TODO handle pipes -> see lecture + notes
 void parsePipe(cvector* cv) {
   if (contains(cv, "|")) {
@@ -101,22 +103,40 @@ void parsePipe(cvector* cv) {
     // create file descriptors
     int pipes[2]; /// pipes[0] is for reading, pipes[1] for writing
     pipe(pipes);
+
+    int p_read = pipes[0];
+    int p_write = pipes[1];
+
     int cpid;
     int stdin_dup = dup(0);
     int stdout_dup = dup(1);
 
-    if ((cpid = fork())) { // parent handles right side
+    if ((cpid = fork())) {
+      // In the parent. execute on right side of pipe
+      close(p_write);
 
-      /*
+      char temp[100];
+      int status;
       waitpid(cpid, &status, 0);
-      dup(pipes[0]);
-      parsePipe(right);
-      // restore
-      dup2(stdin_dup, 0);
+
+      int rv = read(p_read, temp, 100);
       dup2(stdout_dup, 1);
-      */
+      temp[rv] = 0;
+
+      write(1, temp, strlen(temp));
+      //rv = write(1, temp, strlen(temp));
     }
-    else { // child handle left
+    else {
+      // In the child. execute on left side of pipe
+      close(p_read);
+      close(1); // close stdout
+      dup(p_write);
+      char msg[] = "Hello, pipe.\n";
+      char* args[] = {"echo", "pipetest", 0};
+      execvp("echo", args);
+      //write(p_write, msg, strlen(msg));
+      assert(0);
+
     }
   }
   else {
