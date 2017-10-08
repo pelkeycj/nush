@@ -13,7 +13,7 @@
 
 
 #define LINE_BUFFER 256
-
+int exitCode = 0;
 
 
 void execute(cvector* cv);
@@ -41,6 +41,7 @@ void execute(cvector* cv) {
   int bg = 0;
 
   if (cv->size == 0 || contains(cv, "exit")) {
+    exitCode = 1;
     return;
   }
 
@@ -283,6 +284,11 @@ void parseSemicolon(cvector* cv) {
 // loop function to read and process user input
 void userLoop() {
   while (1) {
+
+    if (exitCode) {
+      return;
+    }
+
     char cmd[LINE_BUFFER];
     cvector* cv = new_cvector();
 
@@ -319,6 +325,10 @@ void scriptLoop(char* argv[]) {
   }
 
   while (1) {
+    if (exitCode) {
+      return;
+    }
+    
     char cmd[LINE_BUFFER];
     cvector* cv = new_cvector();
 
