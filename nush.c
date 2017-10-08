@@ -24,6 +24,7 @@ int backgroundProcess(cvector* cv);
 // cvector of command line input is piped through
 // to process the operators
 void parseSemicolon(cvector* cv);
+void parsePipe(cvector* cv);
 void parseBool(cvector* cv);
 void parseRedirOut(cvector* cv);
 void parseRedirIn(cvector* cv);
@@ -84,7 +85,7 @@ void execute(cvector* cv) {
 }
 
 
-//TODO handle pipes -> see lecture + notes
+// handle pipes in command
 void parsePipe(cvector* cv) {
   if (contains(cv, "|")) {
     cvector* left = new_cvector();
