@@ -89,7 +89,7 @@ void parsePipe(cvector* cv) {
   if (contains(cv, "|")) {
     cvector* left = new_cvector();
     cvector* right = new_cvector();
-    int pipeIdx;
+    int pipeIdx = 0;
 
     // get left command
     for (int i = 0; i < cv->size; i++) {
@@ -153,7 +153,7 @@ void parseRedirOut(cvector* cv) {
   int stdout_dup = dup(1);
 
   if (contains(cv, ">")) {
-    char* file;
+    char* file = "";
     cvector* sub = new_cvector();
 
     // find >, create sub cvector up to index
@@ -187,7 +187,7 @@ void parseRedirIn(cvector* cv) {
 
   // < operator: find and open file, execute command arg
   if (contains(cv, "<")) {
-    char* file;
+    char* file = "";
     cvector* sub = new_cvector();
     // find <, read command up until found into sub cvector
     for (int i = 0; i < cv->size; i++) {
@@ -328,7 +328,7 @@ void scriptLoop(char* argv[]) {
     if (exitCode) {
       return;
     }
-    
+
     char cmd[LINE_BUFFER];
     cvector* cv = new_cvector();
 
